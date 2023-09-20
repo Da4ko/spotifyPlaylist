@@ -28,4 +28,10 @@ public class StyleServiceImpl implements StyleService {
                     });
         }
     }
+
+    @Override
+    public Style findByName(StyleName styleName) {
+
+        return styleRepository.findByStyleName(styleName).orElse(null);
+    }
 }

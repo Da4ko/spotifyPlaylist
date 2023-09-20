@@ -1,21 +1,29 @@
-package com.example.examprep4.model.entity;
+package com.example.examprep4.model.service;
 
-import jakarta.persistence.*;
+import com.example.examprep4.model.entity.Style;
+import com.example.examprep4.model.entity.enums.StyleName;
 
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "songs")
-public class Song extends BaseEntity{
+public class SongServiceModel {
+    private String baseEntity;
     private String Performer;
     private String Title;
     private Integer duration;
     private LocalDate releaseDate;
-    private Style style;
+    private StyleName style;
 
-    public Song() {
+    public SongServiceModel() {
     }
-    @Column(name = "performer", nullable = false)
+
+    public String getBaseEntity() {
+        return baseEntity;
+    }
+
+    public void setBaseEntity(String baseEntity) {
+        this.baseEntity = baseEntity;
+    }
+
     public String getPerformer() {
         return Performer;
     }
@@ -23,7 +31,7 @@ public class Song extends BaseEntity{
     public void setPerformer(String performer) {
         Performer = performer;
     }
-    @Column(name = "title", nullable = false)
+
     public String getTitle() {
         return Title;
     }
@@ -31,7 +39,7 @@ public class Song extends BaseEntity{
     public void setTitle(String title) {
         Title = title;
     }
-    @Column(name = "duration", nullable = false)
+
     public Integer getDuration() {
         return duration;
     }
@@ -39,7 +47,7 @@ public class Song extends BaseEntity{
     public void setDuration(Integer duration) {
         this.duration = duration;
     }
-    @Column(name = "release-date", nullable = true)
+
     public LocalDate getReleaseDate() {
         return releaseDate;
     }
@@ -48,12 +56,11 @@ public class Song extends BaseEntity{
         this.releaseDate = releaseDate;
     }
 
-    @ManyToOne
-    public Style getStyle() {
+    public StyleName getStyle() {
         return style;
     }
 
-    public void setStyle(Style style) {
+    public void setStyle(StyleName style) {
         this.style = style;
     }
 }
