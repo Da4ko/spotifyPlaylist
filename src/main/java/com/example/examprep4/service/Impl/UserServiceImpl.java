@@ -1,11 +1,14 @@
 package com.example.examprep4.service.Impl;
 
+import com.example.examprep4.model.entity.Song;
 import com.example.examprep4.model.entity.User;
 import com.example.examprep4.model.service.UserServiceModel;
 import com.example.examprep4.repository.UserRepository;
 import com.example.examprep4.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -28,4 +31,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameAndPassword(username, password)
                 .map(user ->modelMapper.map(user, UserServiceModel.class)).orElse(null);
     }
+
+    @Override
+    public Set<Song> getUsersPlayList(UserServiceModel userServiceModel) {
+        User user = modelMapper.map(userServiceModel, User.class);
+        return  userRepository.findByUsername(user.getUsername()).getPlaylist();
+    }
+
+
 }

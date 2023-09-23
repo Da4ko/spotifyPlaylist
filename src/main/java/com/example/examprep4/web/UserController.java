@@ -2,8 +2,11 @@ package com.example.examprep4.web;
 
 import com.example.examprep4.model.binding.UserLoginBindingModel;
 import com.example.examprep4.model.binding.UserRegisterBindingModel;
+import com.example.examprep4.model.entity.User;
+import com.example.examprep4.model.entity.enums.StyleName;
 import com.example.examprep4.model.service.UserServiceModel;
 import com.example.examprep4.repository.UserRepository;
+import com.example.examprep4.service.SongService;
 import com.example.examprep4.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -12,33 +15,37 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/users")
+//@RequestMapping("")
 public class UserController {
 
     private final UserService userService;
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
+    private final SongService songService;
+
+    private UserServiceModel userServiceModel;
 
     public UserController(UserService userService, ModelMapper modelMapper,
-                          UserRepository userRepository) {
+                          UserRepository userRepository, SongService songService) {
         this.userService = userService;
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
+        this.songService = songService;
     }
 
-    @GetMapping("/register")
+    @GetMapping("/users/register")
     public String register(Model model){
         if(!model.containsAttribute("userRegisterBindingModel")){
             model.addAttribute("userRegisterBindingModel", new UserRegisterBindingModel());
         }
         return "register";
     }
-    @PostMapping("/register")
+    @PostMapping("/users/register")
     public String registerConfirm(@Valid UserRegisterBindingModel userRegisterBindingModel,
                                   BindingResult bindingResult,
                                   RedirectAttributes redirectAttributes){
@@ -52,7 +59,7 @@ public class UserController {
         return "redirect:login";
     }
 
-    @GetMapping("/login")
+    @GetMapping("/users/login")
     public String login(Model model){
         if(!model.containsAttribute("userLoginBindingModel")){
             model.addAttribute("userLoginBindingModel", new UserLoginBindingModel());
@@ -61,7 +68,7 @@ public class UserController {
         return "login";
     }
 
-    @PostMapping("/login")
+    @PostMapping("/users/login")
     public String loginConfirm(@Valid UserLoginBindingModel userLoginBindingModel,
                                BindingResult bindingResult,
                                RedirectAttributes redirectAttributes,
@@ -72,7 +79,7 @@ public class UserController {
 
             return "redirect:login";
         }
-        UserServiceModel userServiceModel = userService.findByUsernameAndPassword(userLoginBindingModel.getUsername(), userLoginBindingModel.getPassword());
+        userServiceModel = userService.findByUsernameAndPassword(userLoginBindingModel.getUsername(), userLoginBindingModel.getPassword());
 
             if(userServiceModel == null){
                 redirectAttributes.addFlashAttribute("userLoginBindingModel", userLoginBindingModel);
@@ -86,10 +93,35 @@ public class UserController {
 
         return "redirect:/";
     }
-    @GetMapping("/logout")
+    @GetMapping("/users/logout")
     public String logout(HttpSession httpSession){
         httpSession.invalidate();
         return "index";
+    }
+    @GetMapping("home/add/{id}")
+    public String addSongToCurrentUserPlaylist(@PathVariable String id){
+
+        songService.addSongToCurrentUserPlayList(id, modelMapper.map(userServiceModel, User.class));
+        return "redirect:/";
+    }
+    @GetMapping("/home/remove-all")
+    public String removeAll(){
+        songService.removeCurrentUserSongs(modelMapper.map(userServiceModel, User.class));
+        return "redirect:/";
+    }
+
+    @GetMapping("/")
+    public String index(HttpSession httpSession, Model model){
+        if(httpSession.getAttribute("user") == null){
+            return "index";
+        }
+        model.addAttribute("pop", songService.findAllSongsByStyleName(StyleName.POP));
+        model.addAttribute("rock", songService.findAllSongsByStyleName(StyleName.ROCK));
+        model.addAttribute("jazz", songService.findAllSongsByStyleName(StyleName.JAZZ));
+
+        model.addAttribute("playlist", userService.getUsersPlayList(userServiceModel));
+
+        return "home";
     }
 
 
